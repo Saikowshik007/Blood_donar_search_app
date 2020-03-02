@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/imageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_launcher_background"
+        tools:layout_editor_absoluteX="0dp" />
+
+    <TextView
+        android:id="@+id/user_name"
+        android:layout_width="192dp"
+        android:layout_height="46dp"
+        android:layout_marginStart="6dp"
+        android:layout_toEndOf="@+id/imageView"
+        android:text="Saikowshik"
+        android:textSize="24sp"
+        tools:layout_editor_absoluteX="282dp" />
+
+    <TextView
+        android:id="@+id/user_age"
+        android:layout_width="57dp"
+        android:layout_height="43dp"
+        android:layout_below="@+id/user_name"
+        android:layout_marginStart="11dp"
+        android:layout_marginTop="-8dp"
+        android:layout_toEndOf="@+id/imageView"
+        android:text="19"
+        android:textSize="24sp" />
+
+    <TextView
+        android:id="@+id/user_group"
+        android:layout_width="66dp"
+        android:layout_height="57dp"
+        android:layout_below="@+id/user_name"
+        android:layout_marginStart="102dp"
+        android:layout_marginTop="6dp"
+        android:layout_toEndOf="@+id/user_phone"
+        android:text="O+"
+        android:textSize="36sp"
+        tools:layout_editor_absoluteX="208dp"
+        tools:layout_editor_absoluteY="16dp" />
+
+    <TextView
+        android:id="@+id/user_phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/user_name"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="32dp"
+        android:layout_toEndOf="@+id/imageView"
+        android:text="9515850919"
+        android:textSize="24sp" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:layout_below="@id/user_phone" />
+
+
+</RelativeLayout>
