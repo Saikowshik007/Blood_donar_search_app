@@ -1,184 +1,92 @@
 package com.example.project;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.cardview.widget.CardView;
+
 import androidx.core.app.ActivityCompat;
-import androidx.core.view.MenuItemCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.fragment.app.DialogFragment;
+
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
+
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.os.Handler;
+
 import android.os.Looper;
-import android.provider.Settings;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
-import android.widget.SearchView;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResult;
+import com.google.android.gms.location.LocationSettingsStates;
+import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
+
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.DocumentChange;
-import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QuerySnapshot;
+
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
+
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.Timer;
+
 
 public class MainActivity extends AppCompatActivity {
-    Set<User> s = new HashSet<>();
-    private List<User> list = new ArrayList<User>() {
-    };
-    private RecyclerView userRecycler;
-    private ListAdapter listAdapter;
-    FirebaseFirestore fs;
+
     int PERMISSION_ID = 44;
     double lat, lon;
     FusedLocationProviderClient mFusedLocationClient;
     String finalcity;
     static MainActivity INSTANCE;
     ProgressBar pb;
-
+    FirebaseFirestore fs;
+    Example ex=new Example();
+    boolean Lflag=false;
+    boolean stop=false;
+    private static GoogleApiClient mGoogleApiClient;
+    private static final int REQUEST_CHECK_SETTINGS = 0x1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         INSTANCE = this;
-        fs = FirebaseFirestore.getInstance();
-        userRecycler = findViewById(R.id.user_recycler);
-        userRecycler.setLayoutManager(new LinearLayoutManager(this));
-        pb = findViewById(R.id.progressBar3);
+        initGoogleAPIClient();
+        pb = findViewById(R.id.progressBar32);
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-        pb.setVisibility(View.VISIBLE);
-        pb.setVisibility(View.INVISIBLE);
-        listAdapter = new ListAdapter(this, list);
-        userRecycler.setAdapter(listAdapter);
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(Color.parseColor("#E43F3F")));
-        ((LinearLayoutManager) userRecycler.getLayoutManager()).setStackFromEnd(true);
-        getLastLocation();
-        if (FirebaseAuth.getInstance().getCurrentUser() == null) {
-            Intent i = new Intent(MainActivity.this, Login.class);
-            startActivity(i);
+
+        if (finalcity == null) {
+            showSettingDialog();
+            new Thread(ex).start();
+        }
+        else{
+            startActivity(new Intent(MainActivity.this,Home.class));
             finish();
         }
     }
-
-    @Override
-    public void onStart()
-    { super.onStart();
-            listAdapter.clear();
-            getdbData();}
-
-
-
-
-
-    public void getdbData() {
-        if (!checkPermissions()) {
-            requestPermissions();
-        }
-        fs.collection("Users").whereEqualTo("location", finalcity).whereEqualTo("group", "O+").addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                    if (doc.getType() == DocumentChange.Type.ADDED) {
-                        String name = doc.getDocument().getString("name");
-                        String phone = doc.getDocument().getString("phone");
-                        String email = doc.getDocument().getString("email");
-                        String group = doc.getDocument().getString("group");
-                        String age = doc.getDocument().getString("age");
-                        String userId = doc.getDocument().getString("userId");
-                        String location = doc.getDocument().getString("location");
-                        list.add(new User(name, phone, email, group, age, userId, location));
-                        listAdapter.notifyDataSetChanged();
-                        userRecycler.scrollToPosition(list.size() - 1);
-                        getSupportActionBar().setTitle(getData());
-                    }
-                }
-
-            }
-        });
-    }
-
-    public void logout() {
-        FirebaseAuth.getInstance().signOut();
-        finish();
-        Intent i = new Intent(MainActivity.this, Login.class);
-        i.putExtra("Location", finalcity);
-        startActivity(i);
-        overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.about_app:
-                startActivity(new Intent(getApplicationContext(), About.class));
-                overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
-                return true;
-
-            case R.id.logout_user:
-                logout();
-                return true;
-            case R.id.app_bar_search:
-                return true;
-            case R.id.refresh:
-                if(finalcity==null) {
-                    pb.setVisibility(View.VISIBLE);
-                    getLastLocation();
-                }
-                else {
-                    Toast.makeText(MainActivity.this, "No refresh required", Toast.LENGTH_LONG).show();
-                    finish();
-                    overridePendingTransition(0, 0);
-                    startActivity(getIntent());
-                    overridePendingTransition(0, 0);
-                }return true;
-
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-
-    }
-
-    @SuppressLint("MissingPermission")
+        @SuppressLint("MissingPermission")
     private void getLastLocation() {
         if (checkPermissions()) {
             if (isLocationEnabled()) {
@@ -193,24 +101,19 @@ public class MainActivity extends AppCompatActivity {
                                     lat = location.getLatitude();
                                     lon = location.getLongitude();
                                     finalcity = hereLocation(lat, lon);
-                                    getdbData();
                                 }
                             }
                         }
                 );
 
             } else {
-                Toast.makeText(this, "Turn on location", Toast.LENGTH_LONG).show();
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-                finish();
+
+
             }
         } else {
             requestPermissions();
         }
     }
-
-
     @SuppressLint("MissingPermission")
     private void requestNewLocationData() {
 
@@ -225,7 +128,6 @@ public class MainActivity extends AppCompatActivity {
                 mLocationRequest, mLocationCallback,
                 Looper.myLooper()
         );
-
     }
 
     private LocationCallback mLocationCallback = new LocationCallback() {
@@ -258,9 +160,12 @@ public class MainActivity extends AppCompatActivity {
 
     private boolean isLocationEnabled() {
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
+        Lflag=locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER) || locationManager.isProviderEnabled(
                 LocationManager.NETWORK_PROVIDER
+
         );
+        return Lflag;
+
     }
 
     @Override
@@ -291,12 +196,91 @@ public class MainActivity extends AppCompatActivity {
         return cityName;
     }
     public static MainActivity getActivityInstance()
-    {
-        return INSTANCE;
+    { return INSTANCE; }
+    public String getData()
+    { return this.finalcity; }
+    public class Example implements Runnable{
+
+        @Override
+        public void run() {
+                try {
+
+                    while(finalcity==null) {
+                        if (stop) {
+                            return;
+                        }
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                pb.setVisibility(View.VISIBLE);
+                            }
+                        });
+
+                        getLastLocation();
+                        Thread.sleep(1500);
+                        pb.setVisibility(View.INVISIBLE);
+                        if (finalcity != null) {
+                            startActivity(new Intent(MainActivity.this, Home.class));
+                            stop = true;
+                            finish();
+                        }
+                    }
+                }
+
+
+                 catch(InterruptedException e){
+                            e.printStackTrace();
+                        }
+                    }
+
+                }
+    private void initGoogleAPIClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(MainActivity.this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+    private void showSettingDialog() {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);//Setting priotity of Location request to high
+        locationRequest.setInterval(30 * 1000);
+        locationRequest.setFastestInterval(5 * 1000);//5 sec Time interval for location update
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        builder.setAlwaysShow(true); //this is the key ingredient to show dialog always when GPS is off
+
+        PendingResult<LocationSettingsResult> result =
+                LocationServices.SettingsApi.checkLocationSettings(mGoogleApiClient, builder.build());
+        result.setResultCallback(new ResultCallback<LocationSettingsResult>() {
+            @Override
+            public void onResult(LocationSettingsResult result) {
+                final Status status = result.getStatus();
+                final LocationSettingsStates state = result.getLocationSettingsStates();
+                switch (status.getStatusCode()) {
+                    case LocationSettingsStatusCodes.SUCCESS:
+                        // All location settings are satisfied. The client can initialize location
+                        // requests here.
+                        break;
+                    case LocationSettingsStatusCodes.RESOLUTION_REQUIRED:
+                        // Location settings are not satisfied. But could be fixed by showing the user
+                        // a dialog.
+                        try {
+                            // Show the dialog by calling startResolutionForResult(),
+                            // and check the result in onActivityResult().
+                            status.startResolutionForResult(MainActivity.this, REQUEST_CHECK_SETTINGS);
+                        } catch (IntentSender.SendIntentException e) {
+                            e.printStackTrace();
+                            // Ignore the error.
+                        }
+                        break;
+                    case LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE:
+                        // Location settings are not satisfied. However, we have no way to fix the
+                        // settings so we won't show the dialog.
+                        break;
+                }
+            }
+        });
     }
 
-    public String getData()
-    {
-        return this.finalcity;
-    }
-}
+            }
+

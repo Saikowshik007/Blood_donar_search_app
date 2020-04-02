@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<group android:checkableBehavior="single">
+    <group  android:title="communication">
+    <item android:id="@+id/nav_profile"
+        android:title="Profile"></item>
+    </group>
+    <item
+        android:id="@+id/nav_share"
+        android:icon="?attr/actionModeShareDrawable"
+        android:title="Share"></item>
+    <item
+        android:icon="@android:drawable/ic_popup_sync"
+        android:id="@+id/refresh"
+        android:iconTint="@color/accent"
+        android:title="Refresh" />
+    <item
+        android:id="@+id/about_app"
+        android:icon="@android:drawable/ic_dialog_info"
+        android:iconTint="@color/accent"
+        android:title="About"></item>
+    <item
+        android:id="@+id/rate"
+        android:icon="@android:drawable/btn_star_big_on"
+        android:iconTint="@color/accent"
+        android:title="Rate Us"></item>
+    <item
+        android:id="@+id/logout_user"
+        android:icon="@android:drawable/ic_lock_power_off"
+        android:iconTint="@color/accent"
+        android:title="Logout"></item>
+
+</group>
+</menu>
