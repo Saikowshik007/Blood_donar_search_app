@@ -19,6 +19,7 @@ First the user will register in the app and then he will find people who are don
 
 A location service is provided which checks periodically current location of the user to suggest the donors. Threads are used to fetch location and data to omit the freeze of UI. Validations are performed using regex. A recycler view Is used to show the fetched data from database in a list view format. The screenshots of the app are provided with the images attachment folder.
 
+apk link:https://drive.google.com/drive/folders/1FlfmK-cDQMoGbUzicx4BtYpwHR6fanr1?usp=sharing
 
 Github: https://github.com/Saikowshik007/Blood_donar_search_app
 
