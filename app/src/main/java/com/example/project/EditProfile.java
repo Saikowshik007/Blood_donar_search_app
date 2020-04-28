@@ -194,6 +194,7 @@ public class EditProfile extends AppCompatActivity implements DatePickerDialog.O
                 if(task.isSuccessful()){
            Toast.makeText(EditProfile.this,"success",Toast.LENGTH_SHORT).show();
            Home.listAdapter.notifyDataSetChanged();
+           startActivity(new Intent(EditProfile.this,Home.class));
            finish();
                 }
                 else{Toast.makeText(EditProfile.this,"Failed due to "+task.getException(),Toast.LENGTH_SHORT).show();

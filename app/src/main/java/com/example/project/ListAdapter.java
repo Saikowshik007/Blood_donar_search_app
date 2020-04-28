@@ -32,7 +32,7 @@ public class ListAdapter extends RecyclerView.Adapter implements Filterable {
     private Context contex;
     Dialog mDialouge;
     TextView name,lastdonated;
-    FloatingActionButton phone, message;
+    FloatingActionButton phone, message,rate;
     ImageView img2,image;
     String num, pname, pnum;
     String s;
@@ -92,9 +92,10 @@ public class ListAdapter extends RecyclerView.Adapter implements Filterable {
             phone = mDialouge.findViewById(R.id.imageButton2);
             img2 = mDialouge.findViewById(R.id.imageView2);
             message = mDialouge.findViewById(R.id.imageButton4);
+        rate = mDialouge.findViewById(R.id.imageButton3);
             lastdonated = mDialouge.findViewById(R.id.textView12);
             pname = currentuser.get(0).getName();
-            pnum = currentuser.get(0).getPhone();
+          pnum = currentuser.get(0).getPhone();
             Toast.makeText(contex, "Unable to create user", Toast.LENGTH_SHORT);
             setAnimation(holder.itemView, position);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -146,6 +147,12 @@ public class ListAdapter extends RecyclerView.Adapter implements Filterable {
                     contex.startActivity(new Intent(Intent.ACTION_VIEW, Uri.fromParts("sms", num, null)).putExtra("sms_body", "Dear donor," +
                             "\n" + "We require an emergency blood donation at  " + details.getLocation() + " for the user " + pname + " having phone number: " + pnum + " \n" +
                             " Kindly respond immediately."));
+                }
+            });
+            rate.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(contex,"Feature coming soon...",Toast.LENGTH_SHORT).show();
                 }
             });
 

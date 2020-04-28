@@ -15,8 +15,10 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/textView12"
         android:layout_marginBottom="50dp"
+        android:autoSizeTextType="uniform"
         android:elevation="20dp"
         android:text="name"
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="30dp"
         android:textStyle="bold" />
@@ -36,8 +38,10 @@
         android:layout_height="wrap_content"
         android:layout_above="@+id/view4"
         android:layout_marginBottom="30dp"
+        android:autoSizeTextType="uniform"
         android:elevation="20dp"
         android:text="Last donated"
+        android:textAlignment="center"
         android:textColor="@color/black"
         android:textSize="24sp"
         android:textStyle="bold" />

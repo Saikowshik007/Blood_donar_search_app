@@ -66,7 +66,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     String finalcity,userid,emailf;
     static String docid,location;
     Boolean stop = false;
-    User current;
+    User current,data;
     ImageView image;
     FirebaseAuth fa;
     @Override
@@ -114,6 +114,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
 
     public void getdbData(final String field, final String query) {
         list.clear();
+        currentuser.add(0,new User("No Data","No Data","No Data","No Data","No Data","No Data","No Data","No Data","No Data"));
         fs.collection("Users").whereEqualTo(field,query).addSnapshotListener(new EventListener<QuerySnapshot>() {
             @Override
             public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
@@ -129,14 +130,16 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                         String date=doc.getDocument().getString("date");
                         String available = doc.getDocument().getString("availability");
                         if(userid.contains(userId)&&email.contains(emailf)) {
+                            if(date=="" || date==null){date="Not yet Donated";}
                             currentuser.clear();
                             current=new User(name, phone, email, group, age, userId, location,date,available);
-                            currentuser.add(current);
+                            currentuser.add(0,current);
                             image.setImageResource(currentuser.get(0).getAvailability().contains("0")?R.drawable.rounded:R.drawable.rounded_green);
                             docid=doc.getDocument().getId();
                             updatedb();
                         }
                         else {
+                            if(date=="" || date==null){date="Not yet Donated";}
                                 list.add(new User(name, phone, email, group, age, userId, location, date, available));
                                 userRecycler.scrollToPosition(0);
                             }

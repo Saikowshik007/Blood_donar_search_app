@@ -35,7 +35,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class Profile  extends AppCompatActivity{
     String pname,pnum,email,group,age,userId,location,password;
-    TextView a, b,c,d,e;
+    TextView a, b,c,d,e,f;
     ImageButton back;
     Dialog mdialog;
     EditText emailf,passwordf;
@@ -49,6 +49,7 @@ public class Profile  extends AppCompatActivity{
         b = findViewById(R.id.my_emailid);
         c = findViewById(R.id.my_blood_group);
         d = findViewById(R.id.my_location);
+        f = findViewById(R.id.last_donated);
         password="saikowshik@1";
         floatingActionButton=findViewById(R.id.floatingActionButton);
         delete=findViewById(R.id.floatingActionButton2);
@@ -97,6 +98,7 @@ confirm.setOnClickListener(new View.OnClickListener() {
         c.setText(Home.currentuser.get(0).getGroup());
         d.setText(Home.currentuser.get(0).getLocation());
         e.setText(Home.currentuser.get(0).getPhone());
+        f.setText(Home.currentuser.get(0).getDate());
     }
     void deletedata() {
         FirebaseFirestore.getInstance().collection("Users").document(Home.docid).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
