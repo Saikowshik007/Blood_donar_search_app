@@ -11,6 +11,7 @@ public class User {
     String date;
     String availability;
     String lat,lon;
+    boolean expanded;
     public User(String name, String phone, String email,String group,String age,String userId,String location,String date,String availability,String lat,String lon) {
         this.name = name;
         this.phone = phone;
@@ -23,6 +24,7 @@ public class User {
         this.availability=availability;
         this.lat=lat;
         this.lon=lon;
+        this.expanded=false;
     }
 
     public String getName() {
@@ -42,4 +44,6 @@ public class User {
     public String getAvailability(){return availability;}
     public String getLat(){return lat;}
     public String getLon(){return lon;}
+    public void setExpanded(boolean expanded){this.expanded=expanded;}
+    public boolean isExpanded(){return expanded;}
 }

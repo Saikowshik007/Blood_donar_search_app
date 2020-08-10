@@ -18,6 +18,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -33,14 +34,12 @@ public class ListAdapter extends RecyclerView.Adapter implements Filterable {
     private List<User> userList;
     ImmutableList<User> complete;
     private Context contex;
-    Dialog mDialouge;
     TextView name,lastdonated;
     FloatingActionButton phone, message,rate;
-    ImageView img2,image;
+    ImageView image;
     String num, pname, pnum;
-    String s;
     List<User> currentuser;
-    private int lastPosition = -1;
+
 
     public ListAdapter(Context context, List<User> messageList, List<User> currentUser) {
         userList = messageList;
@@ -82,54 +81,31 @@ public class ListAdapter extends RecyclerView.Adapter implements Filterable {
 
     // Passes the message object to a ViewHolder so that the contents can be bound to UI.
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
 
         final User details = userList.get(position);
             ((userHolder) holder).bind(details);
-            mDialouge = new Dialog(contex);
-            mDialouge.setContentView(R.layout.fragment);
-        mDialouge.getWindow().getAttributes().windowAnimations=R.anim.zoomout;
         image=holder.itemView.findViewById(R.id.imageView10);
         image.setImageResource(details.getAvailability().contains("0")?R.drawable.rounded:R.drawable.rounded_green);
-            name = mDialouge.findViewById(R.id.textView11);
-            phone = mDialouge.findViewById(R.id.imageButton2);
-            img2 = mDialouge.findViewById(R.id.imageView2);
-            message = mDialouge.findViewById(R.id.imageButton4);
-        rate = mDialouge.findViewById(R.id.imageButton3);
-            lastdonated = mDialouge.findViewById(R.id.textView12);
+            phone = holder.itemView.findViewById(R.id.imageButton2);
+            message = holder.itemView.findViewById(R.id.imageButton4);
+        rate = holder.itemView.findViewById(R.id.imageButton3);
+            lastdonated = holder.itemView.findViewById(R.id.textView19);
             pname = currentuser.get(0).getName();
           pnum = currentuser.get(0).getPhone();
+          boolean isExpanded=userList.get(position).isExpanded();
+          ((userHolder) holder).cl.setVisibility(isExpanded?View.VISIBLE:View.GONE);
             Toast.makeText(contex, "Unable to create user", Toast.LENGTH_SHORT);
-            setAnimation(holder.itemView, position);
+            //setAnimation(holder.itemView, position);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
-                    name.setText(details.getName());
                     num = details.getPhone();
                     lastdonated.setText(details.getDate());
-                    switch (details.getGroup()) {
-                        case "O+":
-                            img2.setImageResource(R.drawable.oplus);
-                            break;
-                        case "O-":
-                            img2.setImageResource(R.drawable.ominus);
-                            break;
-                        case "A+":
-                            img2.setImageResource(R.drawable.aplus);
-                            break;
-                        case "A-":
-                            img2.setImageResource(R.drawable.aminus);
-                            break;
-                        case "B+":
-                            img2.setImageResource(R.drawable.bplus);
-                            break;
-                        case "B-":
-                            img2.setImageResource(R.drawable.bminus);
-                            break;
-                    }
 
-                    mDialouge.show();
+                    User user=userList.get(holder.getAdapterPosition());
+                    user.setExpanded(!user.isExpanded());
+                    notifyItemChanged(holder.getAdapterPosition());
                 }
             });
             phone.setOnClickListener(new View.OnClickListener() {
@@ -198,12 +174,14 @@ public class ListAdapter extends RecyclerView.Adapter implements Filterable {
     public class userHolder extends RecyclerView.ViewHolder {
         TextView name, phone, age,distance;
         ImageView sample;
+        ConstraintLayout cl;
         public userHolder(View itemView) {
             super(itemView);
             name = itemView.findViewById(R.id.user_name);
             age = itemView.findViewById(R.id.user_age);
             sample = itemView.findViewById(R.id.textView13);
             distance=itemView.findViewById(R.id.distance);
+            cl=itemView.findViewById(R.id.expandable);
         }
 
         void bind(User message) {
@@ -239,7 +217,7 @@ public class ListAdapter extends RecyclerView.Adapter implements Filterable {
 
     private void setAnimation(View viewToAnimate, int position) {
 
-       Animation animation = AnimationUtils.loadAnimation(contex, R.anim.bounce);
+       Animation animation = AnimationUtils.loadAnimation(contex, R.anim.push_left_in);
             viewToAnimate.startAnimation(animation);
     }
     static double haversine(double lat1, double lon1,
