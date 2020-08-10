@@ -64,6 +64,7 @@
         android:layout_height="match_parent">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout5"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="16dp"
@@ -232,4 +233,5 @@
         android:backgroundTint="@android:color/holo_green_dark"
         android:clickable="true"
         app:srcCompat="@android:drawable/ic_menu_delete" />
+
 </RelativeLayout>

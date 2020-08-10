@@ -187,7 +187,7 @@ public class EditProfile extends AppCompatActivity implements DatePickerDialog.O
         datePickerDialog.show();
     }
     public void update(){
-        DocumentReference ref=fs.collection("Users").document(Home.docid);
+        DocumentReference ref=fs.collection("Users").document(fa.getCurrentUser().getUid());
         ref.update("name",name,"phone",phone,"age",age,"location",city,"group",group,"email",email,"date",date,"availability",available.isChecked()?"1":"0").addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {

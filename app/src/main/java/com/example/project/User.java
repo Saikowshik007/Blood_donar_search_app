@@ -10,7 +10,8 @@ public class User {
     String location;
     String date;
     String availability;
-    public User(String name, String phone, String email,String group,String age,String userId,String location,String date,String availability) {
+    String lat,lon;
+    public User(String name, String phone, String email,String group,String age,String userId,String location,String date,String availability,String lat,String lon) {
         this.name = name;
         this.phone = phone;
         this.email = email;
@@ -20,6 +21,8 @@ public class User {
         this.location=location;
         this.date=date;
         this.availability=availability;
+        this.lat=lat;
+        this.lon=lon;
     }
 
     public String getName() {
@@ -37,4 +40,6 @@ public class User {
     public String getLocation() { return location; }
     public String getDate(){return date;}
     public String getAvailability(){return availability;}
+    public String getLat(){return lat;}
+    public String getLon(){return lon;}
 }

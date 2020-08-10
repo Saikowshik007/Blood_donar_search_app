@@ -44,8 +44,6 @@ import com.google.android.gms.location.LocationSettingsStatusCodes;
 import com.google.android.gms.tasks.OnCompleteListener;
 
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 
 import java.io.IOException;
@@ -62,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
     String finalcity;
     static MainActivity INSTANCE;
     ProgressBar pb;
-    FirebaseFirestore fs;
     Example ex=new Example();
     boolean Lflag=false;
     boolean stop=false;

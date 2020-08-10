@@ -12,6 +12,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -77,10 +78,12 @@ delete.setOnClickListener(new View.OnClickListener() {
     public void onClick(View v) {
 mdialog.show();
 Button confirm,close;
+final ProgressBar pb;
 emailf=mdialog.findViewById(R.id.email);
 passwordf=mdialog.findViewById(R.id.password);
 confirm=mdialog.findViewById(R.id.button4);
 close=mdialog.findViewById(R.id.button3);
+
 close.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View v) { mdialog.cancel(); }});
@@ -89,6 +92,7 @@ confirm.setOnClickListener(new View.OnClickListener() {
     public void onClick(View v) {
         email=emailf.getText().toString();
         password=passwordf.getText().toString();
+
         reauthenticate();}});
     }});
     }
@@ -101,12 +105,13 @@ confirm.setOnClickListener(new View.OnClickListener() {
         f.setText(Home.currentuser.get(0).getDate());
     }
     void deletedata() {
-        FirebaseFirestore.getInstance().collection("Users").document(Home.docid).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+        FirebaseFirestore.getInstance().collection("Users").document(user.getUid()).delete().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
+
                 if (task.isSuccessful()) {
-                    Toast.makeText(Profile.this, "deleted data", Toast.LENGTH_SHORT).show();
                     deleteuser();
+
                 } else {
                     Toast.makeText(Profile.this, "" + task.getException(), Toast.LENGTH_SHORT).show();
                 }
@@ -119,8 +124,9 @@ confirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onSuccess(Void aVoid) {
                 Toast.makeText(Profile.this,"deleted",Toast.LENGTH_SHORT).show();
-                //startActivity(new Intent(Profile.this,Login.class));
-                //finish();
+
+                startActivity(new Intent(Profile.this,Login.class));
+                finish();
                 }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -130,29 +136,36 @@ confirm.setOnClickListener(new View.OnClickListener() {
         });
 
     }
-    private void reauthenticate(){
-        if(!email.isEmpty()&&!password.isEmpty()) {
-            AuthCredential credential = EmailAuthProvider
-                    .getCredential(email, password);
-            user.reauthenticate(credential)
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if (task.isSuccessful()) {
-                                deletedata();
-                            } else {
-                                mdialog.cancel();
-                                emailf.setText("");passwordf.setText("");emailf.clearFocus();
-                                Toast.makeText(Profile.this, "deleted" + task.getException(), Toast.LENGTH_LONG).show();
+    private void reauthenticate() {
+        if (!email.isEmpty() && !password.isEmpty()) {
+            if (email.contains(user.getEmail())) {
+                AuthCredential credential = EmailAuthProvider
+                        .getCredential(email, password);
+                user.reauthenticate(credential)
+                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                            @Override
+                            public void onComplete(@NonNull Task<Void> task) {
+                                if (task.isSuccessful()) {
+                                    deletedata();
+                                } else {
+                                    mdialog.cancel();
+                                    emailf.setText("");
+                                    passwordf.setText("");
+                                    emailf.clearFocus();
+                                    Toast.makeText(Profile.this, "deleted" + task.getException(), Toast.LENGTH_LONG).show();
+                                }
                             }
-                        }
-                    });
+                        });
+            } else {
+                Toast.makeText(Profile.this, "Enter a valid email address", Toast.LENGTH_LONG).show();
+            }
+        } else {
+            emailf.setError("This field cannot be empty.");
+            emailf.requestFocus();
         }
-        else{emailf.setError("This field cannot be empty.");emailf.requestFocus();}
     }
     @Override
-    public void onBackPressed()
-    {
+    public void onBackPressed(){
         startActivity(new Intent(Profile.this, Home.class));
         finish();
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);

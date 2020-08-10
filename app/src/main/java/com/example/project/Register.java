@@ -28,6 +28,7 @@ import com.google.firebase.auth.PhoneAuthCredential;
 import com.google.firebase.auth.PhoneAuthProvider;
 import com.google.firebase.auth.UserProfileChangeRequest;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.rilixtech.widget.countrycodepicker.CountryCodePicker;
 
@@ -44,6 +45,7 @@ public class Register extends AppCompatActivity implements DatePickerDialog.OnDa
     ProgressBar pb;
     String userId, email, password, phone, name, age, group, city, otp,date;
     FirebaseFirestore fs;
+    MainActivity ma;
     String[] groups = {"O+", "A+", "B+", "AB+", "O-", "A-", "B-", "AB-"};
     private String mVerificationId;
     public boolean validate(String name, String email, String password, String phone, String city) {
@@ -96,6 +98,7 @@ public class Register extends AppCompatActivity implements DatePickerDialog.OnDa
         passwordf = findViewById(R.id.editText5);
         register = findViewById(R.id.button2);
         fs = FirebaseFirestore.getInstance();
+        ma=MainActivity.getActivityInstance();
         location.setText("Current Location" + " : " + city);
         ArrayAdapter<String> groupa = new ArrayAdapter<String>(Register.this, R.layout.support_simple_spinner_dropdown_item, groups);
         groupf.setAdapter(groupa);
@@ -225,10 +228,10 @@ public class Register extends AppCompatActivity implements DatePickerDialog.OnDa
                 if (task.isSuccessful()) {
                     pb.setVisibility(View.INVISIBLE);
                     userId = fa.getCurrentUser().getUid();
-                    User user1 = new User(name, phone, email, group, age, userId, city,date,"1");
+                    User user1 = new User(name, phone, email, group, age, userId, city,date,"1",Double.toString(ma.lat),Double.toString(ma.lon));
                     Toast.makeText(Register.this, "Authentication passed.", Toast.LENGTH_SHORT).show();
-                    CollectionReference cf = fs.collection("Users");
-                    cf.add(user1);
+                    DocumentReference cf = fs.collection("Users").document(fa.getCurrentUser().getUid());
+                    cf.set(user1);
                     finish();
                     UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                             .setDisplayName(name).build();

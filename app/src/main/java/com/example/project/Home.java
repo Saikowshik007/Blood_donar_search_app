@@ -64,7 +64,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
     ProgressBar pb;
     MainActivity ma;
     String finalcity,userid,emailf;
-    static String docid,location;
+    static String location,lat,lon;
     Boolean stop = false;
     User current,data;
     ImageView image;
@@ -104,63 +104,71 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         } else if (ma.Lflag) {
             userid= fa.getCurrentUser().getUid().trim();
             emailf=fa.getCurrentUser().getEmail();
-            getdbData("userId",userid);
-            getdbData("location",finalcity);
-            //Toast.makeText(Home.this,""+userid,Toast.LENGTH_SHORT).show();
+
+            getdbData();
 
 
         }
     }
 
-    public void getdbData(final String field, final String query) {
+    public void getdbData(){
         list.clear();
-        currentuser.add(0,new User("No Data","No Data","No Data","No Data","No Data","No Data","No Data","No Data","No Data"));
-        fs.collection("Users").whereEqualTo(field,query).addSnapshotListener(new EventListener<QuerySnapshot>() {
-            @Override
-            public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
-                    if (doc.getType() == DocumentChange.Type.ADDED) {
-                        String name = doc.getDocument().getString("name");
-                        String phone = doc.getDocument().getString("phone");
-                        String email = doc.getDocument().getString("email");
-                        String group = doc.getDocument().getString("group");
-                        String age = doc.getDocument().getString("age");
-                        String userId = doc.getDocument().getString("userId").trim();
-                        location = doc.getDocument().getString("location");
-                        String date=doc.getDocument().getString("date");
-                        String available = doc.getDocument().getString("availability");
-                        if(userid.contains(userId)&&email.contains(emailf)) {
-                            if(date=="" || date==null){date="Not yet Donated";}
-                            currentuser.clear();
-                            current=new User(name, phone, email, group, age, userId, location,date,available);
-                            currentuser.add(0,current);
-                            image.setImageResource(currentuser.get(0).getAvailability().contains("0")?R.drawable.rounded:R.drawable.rounded_green);
-                            docid=doc.getDocument().getId();
-                            updatedb();
-                        }
-                        else {
-                            if(date=="" || date==null){date="Not yet Donated";}
-                                list.add(new User(name, phone, email, group, age, userId, location, date, available));
-                                userRecycler.scrollToPosition(0);
+        currentuser.add(0,new User("No Data","No Data","No Data","No Data","No Data","No Data","No Data","No Data","No Data","0","0"));
+            fs.collection("Users").whereEqualTo("location", finalcity).addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                    if(e!=null){}
+                    else {
+                        for (DocumentChange doc : queryDocumentSnapshots.getDocumentChanges()) {
+                            if (doc.getType() == DocumentChange.Type.ADDED) {
+                                String name = doc.getDocument().getString("name");
+                                String phone = doc.getDocument().getString("phone");
+                                String email = doc.getDocument().getString("email");
+                                String group = doc.getDocument().getString("group");
+                                String age = doc.getDocument().getString("age");
+                                String userId = doc.getDocument().getString("userId").trim();
+                                location = doc.getDocument().getString("location");
+                                String date = doc.getDocument().getString("date");
+                                String available = doc.getDocument().getString("availability");
+                                lat = doc.getDocument().getString("lat");
+                                lon = doc.getDocument().getString("lon");
+                                if (doc.getDocument().getId().contains(fa.getCurrentUser().getUid())) {
+                                    if (date == "" || date == null) {
+                                        date = "Not yet Donated";
+                                    }
+                                    currentuser.clear();
+                                    current = new User(name, phone, email, group, age, userId, location, date, available, lat, lon);
+                                    currentuser.add(0, current);
+                                    image.setImageResource(currentuser.get(0).getAvailability().contains("0") ? R.drawable.rounded : R.drawable.rounded_green);
+                                    updatedb();
+                                } else {
+                                    if (date == "" || date == null) {
+                                        date = "Not yet Donated";
+                                    }
+                                    list.add(new User(name, phone, email, group, age, userId, location, date, available, lat, lon));
+                                    userRecycler.scrollToPosition(0);
+                                }
+
+
                             }
-
-                        toolbar.setTitle(finalcity);
+                        }
                     }
+                    toolbar.setTitle(finalcity);
+                    listAdapter.msort();
+                    listAdapter.dup(list);
                 }
-                listAdapter.dup(list);
-            }
-        });
+            });
+            listAdapter.notifyDataSetChanged();
 
-        //Toast.makeText(Home.this,""+field+"\n"+currentuser,Toast.LENGTH_SHORT).show();
     }
 
     public void logout() {
         fa.signOut();
-        finish();
         Intent i = new Intent(Home.this, Login.class);
         i.putExtra("Location", finalcity);
         startActivity(i);
         overridePendingTransition(R.anim.push_left_in, R.anim.push_left_out);
+        finish();
     }
 
     @Override
@@ -204,7 +212,7 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
                 break;
 
             case R.id.refresh:
-                if (finalcity == null) {
+                if (true) {
                     pb.setVisibility(View.VISIBLE);
                     finish();
                     overridePendingTransition(0, 0);
@@ -229,8 +237,6 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             case R.id.rate:
                 Uri uri = Uri.parse("market://details?id=" + this.getPackageName());
                 Intent goToMarket = new Intent(Intent.ACTION_VIEW, uri);
-                // To count with Play market backstack, After pressing back button,
-                // to taken back to our application, we need to add following flags to intent.
                 goToMarket.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY |
                         Intent.FLAG_ACTIVITY_NEW_DOCUMENT |
                         Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -248,14 +254,15 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
         return true;
     }
     public void updatedb(){
-        DocumentReference ref=fs.collection("Users").document(Home.docid);
+        DocumentReference ref=fs.collection("Users").document(fa.getCurrentUser().getUid());
 
-        if(!location.contains(finalcity)) {
-            ref.update("location", finalcity).addOnCompleteListener(new OnCompleteListener<Void>() {
+        if(!location.contains(finalcity)||!lat.contains(Double.toString(ma.lat))||!lon.contains(Double.toString(ma.lon))) {
+            ref.update("location", finalcity,"lat",Double.toString(ma.lat),"lon",Double.toString(ma.lon)).addOnCompleteListener(new OnCompleteListener<Void>() {
                 @Override
                 public void onComplete(@NonNull Task<Void> task) {
                     if (task.isSuccessful()) {
                         Toast.makeText(Home.this, " Location updated", Toast.LENGTH_SHORT).show();
+
                     } else {
                         Toast.makeText(Home.this, " cannot update location" + task.getException(), Toast.LENGTH_SHORT).show();
                     }
@@ -263,6 +270,5 @@ public class Home extends AppCompatActivity implements NavigationView.OnNavigati
             });
         }
     }
-
 
 }
